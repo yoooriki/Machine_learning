@@ -1,0 +1,25 @@
+{
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [],
+    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.indexing": true,
+    "python.analysis.packageIndexDepths": [
+        {
+            "name": "*",
+            "depth": 3
+        }
+    ],
+    "python.languageServer": "Pylance",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "error",
+        "reportMissingModuleSource": "error",
+        "reportMissingTypeStubs": "error"
+    },
+    "python.analysis.importFormat": "absolute",
+    "python.analysis.extraPaths": ["${workspaceFolder}/src"],
+    "python.analysis.useLibraryCodeForTypes": true,
+    "editor.formatOnSave": true
+}

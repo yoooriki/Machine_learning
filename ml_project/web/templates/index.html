@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器学习模型分析报告</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --apple-blue: #007AFF;
+            --apple-green: #34C759;
+            --apple-indigo: #5856D6;
+            --apple-orange: #FF9500;
+            --apple-pink: #FF2D55;
+            --apple-purple: #AF52DE;
+            --apple-red: #FF3B30;
+            --apple-teal: #5AC8FA;
+            --apple-yellow: #FFCC00;
+            --apple-gray: #8E8E93;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background-color: #F5F5F7;
+            color: #1D1D1F;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chart-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--apple-blue), var(--apple-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .export-button {
+            color: var(--apple-blue);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .export-button:hover {
+            background-color: rgba(0, 122, 255, 0.1);
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">机器学习模型分析报告</h1>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-500">更新时间：{{ current_time }}</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 模型性能指标 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="metric-card bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-1">训练集准确率</h3>
+                <p class="text-3xl font-semibold" style="color: var(--apple-blue)">{{ train_accuracy }}%</p>
+                <div class="mt-2 text-sm text-gray-600">↑ 目标基准 95%</div>
+            </div>
+            <div class="metric-card bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-1">测试集准确率</h3>
+                <p class="text-3xl font-semibold" style="color: var(--apple-green)">{{ test_accuracy }}%</p>
+                <div class="mt-2 text-sm text-gray-600">↑ 目标基准 90%</div>
+            </div>
+            <div class="metric-card bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-1">AUC分数</h3>
+                <p class="text-3xl font-semibold" style="color: var(--apple-purple)">{{ auc_score }}</p>
+                <div class="mt-2 text-sm text-gray-600">↑ 目标基准 0.9</div>
+            </div>
+            <div class="metric-card bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-1">模型状态</h3>
+                <p class="text-3xl font-semibold" style="color: var(--apple-teal)">已部署</p>
+                <div class="mt-2 text-sm text-gray-600">更新于 2小时前</div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="space-y-8">
+            <!-- 特征重要性分析 -->
+            <section class="chart-container p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">特征重要性分析</h2>
+                        <p class="text-sm text-gray-500 mt-1">对模型决策过程中各个特征的重要性进行量化分析</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="export-button">
+                            导出报告
+                        </button>
+                    </div>
+                </div>
+                <div id="importance-plot" class="h-96"></div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- ROC曲线分析 -->
+                <section class="chart-container p-6">
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900">ROC曲线分析</h2>
+                        <p class="text-sm text-gray-500 mt-1">模型在不同阈值下的分类性能评估</p>
+                    </div>
+                    <div id="roc-plot" class="h-80"></div>
+                </section>
+
+                <!-- 混淆矩阵 -->
+                <section class="chart-container p-6">
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900">混淆矩阵</h2>
+                        <p class="text-sm text-gray-500 mt-1">模型预测结果的详细分类情况</p>
+                    </div>
+                    <div id="cm-plot" class="h-80"></div>
+                </section>
+            </div>
+
+            <!-- 学习曲线 -->
+            <section class="chart-container p-6">
+                <div class="mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900">学习曲线</h2>
+                    <p class="text-sm text-gray-500 mt-1">模型在训练过程中的性能变化趋势</p>
+                </div>
+                <div id="learning-plot" class="h-80"></div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // 配置共享的图表主题
+        const commonLayout = {
+            font: {
+                family: 'Arial, sans-serif',
+                color: '#333333'
+            },
+            paper_bgcolor: '#ffffff',
+            plot_bgcolor: '#ffffff',
+            margin: {t: 30, r: 30, b: 60, l: 60},
+            xaxis: {
+                gridcolor: '#dddddd',
+                linecolor: '#dddddd',
+                tickfont: {
+                    color: '#666666'
+                }
+            },
+            yaxis: {
+                gridcolor: '#dddddd',
+                linecolor: '#dddddd',
+                tickfont: {
+                    color: '#666666'
+                }
+            }
+        };
+
+        // 渲染特征重要性图
+        var importanceData = {{ importance_plot | safe }};
+        importanceData.layout = Object.assign({}, importanceData.layout, commonLayout);
+        Plotly.newPlot('importance-plot', importanceData.data, importanceData.layout);
+        
+        // 渲染ROC曲线
+        var rocData = {{ roc_plot | safe }};
+        rocData.layout = Object.assign({}, rocData.layout, commonLayout);
+        Plotly.newPlot('roc-plot', rocData.data, rocData.layout);
+        
+        // 渲染混淆矩阵
+        var cmData = {{ cm_plot | safe }};
+        cmData.layout = Object.assign({}, cmData.layout, commonLayout);
+        Plotly.newPlot('cm-plot', cmData.data, cmData.layout);
+        
+        // 渲染学习曲线
+        var learningData = {{ learning_plot | safe }};
+        learningData.layout = Object.assign({}, learningData.layout, commonLayout);
+        Plotly.newPlot('learning-plot', learningData.data, learningData.layout);
+    </script>
+</body>
+</html>
